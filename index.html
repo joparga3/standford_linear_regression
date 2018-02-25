@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Jose Parreno Garcia" />
+
+
+<title>Notes Linear Regression - Standford ML Andrew Ng</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Notes Andrew NG course</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Liner regression</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Notes Linear Regression - Standford ML Andrew Ng</h1>
+<h4 class="author"><em>Jose Parreno Garcia</em></h4>
+<h4 class="date"><em>March 2018</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#what-is-linear-regression"><span class="toc-section-number">1</span> What is linear regression?</a></li>
+<li><a href="#what-is-the-best-possible-fitting-line"><span class="toc-section-number">2</span> What is the best possible fitting line?</a><ul>
+<li><a href="#introducing-a-bit-of-math."><span class="toc-section-number">2.1</span> Introducing a bit of math.</a></li>
+</ul></li>
+<li><a href="#accurate-model-comparison-normalisation-of-the-model."><span class="toc-section-number">3</span> Accurate model comparison (normalisation of the model).</a></li>
+<li><a href="#careful-with-the-data."><span class="toc-section-number">4</span> Careful with the data.</a></li>
+<li><a href="#basic-supervised-learning-algorithm"><span class="toc-section-number">5</span> Basic Supervised learning algorithm</a></li>
+<li><a href="#hypothesis-for-univariate-linear-regression"><span class="toc-section-number">6</span> Hypothesis for univariate linear regression</a></li>
+<li><a href="#cost-function---intuition"><span class="toc-section-number">7</span> Cost function - intuition</a></li>
+<li><a href="#gradient-descent-algorithm"><span class="toc-section-number">8</span> Gradient Descent Algorithm</a><ul>
+<li><a href="#partial-derivatives."><span class="toc-section-number">8.1</span> Partial derivatives.</a></li>
+<li><a href="#effect-of-alpha."><span class="toc-section-number">8.2</span> Effect of alpha.</a></li>
+<li><a href="#gradient-descent-for-univariate-linear-regression"><span class="toc-section-number">8.3</span> Gradient descent for univariate linear regression</a></li>
+</ul></li>
+<li><a href="#multivariate-linear-regression"><span class="toc-section-number">9</span> Multivariate linear regression</a><ul>
+<li><a href="#formula-and-notation"><span class="toc-section-number">9.1</span> Formula and notation</a></li>
+<li><a href="#gradient-descent-for-multiple-features"><span class="toc-section-number">9.2</span> Gradient descent for multiple features</a></li>
+<li><a href="#changes-to-gradient-descent-feature-scaling"><span class="toc-section-number">9.3</span> Changes to gradient descent: feature scaling</a></li>
+<li><a href="#changes-to-gradient-descent-learning-rate"><span class="toc-section-number">9.4</span> Changes to gradient descent: learning rate</a></li>
+<li><a href="#computing-parameters-normal-equation"><span class="toc-section-number">9.5</span> Computing parameters: normal equation</a></li>
+<li><a href="#when-to-use-it"><span class="toc-section-number">9.6</span> When to use it</a></li>
+</ul></li>
+<li><a href="#truck-prediction-problem"><span class="toc-section-number">10</span> Truck prediction problem</a><ul>
+<li><a href="#problem"><span class="toc-section-number">10.1</span> Problem</a></li>
+<li><a href="#visualising-the-data"><span class="toc-section-number">10.2</span> Visualising the data</a></li>
+<li><a href="#gradient-descent"><span class="toc-section-number">10.3</span> Gradient descent</a></li>
+<li><a href="#checkig-results"><span class="toc-section-number">10.4</span> Checkig results</a></li>
+</ul></li>
+</ul>
+</div>
+
+<style>
+body {
+text-align: justify}
+
+</style>
+<p><br></p>
+<pre class="r"><code>library(knitr)</code></pre>
+<p><br></p>
+<div id="what-is-linear-regression" class="section level1">
+<h1><span class="header-section-number">1</span> What is linear regression?</h1>
+<p>Linear regression is one of the most (if not the most) basic algorithms used to create predictive models. The basic idea behind linear regression is to be able to fit a straight line through the data that, at the same time, will explain or reflect as accurately as possible the real values for each point.</p>
+<p>Linear regression is used when you want to compare a variable (normally called a dependant variable), against one or more other variables (called independent variables). Intuitively, the variable we want to compare is called dependant variable because the results will depend on which other variables are you comparing it to. Mathematically speaking, the dependant variable is equivalent to the y axis, and the independent variables are plotted against the x axis. Let’s begin with a very simple example:</p>
+<p>We might want to know what the relationship is between unemployment rate and the amount of murders in a city. In this case, we choose the amount of murders as the dependant variable and the unemployment rate as the independent variable.</p>
+<p>**Dataset source: <a href="http://people.sc.fsu.edu/~jburkardt/datasets/regression/x08.txt**" class="uri">http://people.sc.fsu.edu/~jburkardt/datasets/regression/x08.txt**</a></p>
+<p><img src="images/1.PNG" width="995" /></p>
+<p><br></p>
+</div>
+<div id="what-is-the-best-possible-fitting-line" class="section level1">
+<h1><span class="header-section-number">2</span> What is the best possible fitting line?</h1>
+<p>Before getting into a bit of maths, let’s try to intuitively understand why is the red line shown the best possible fitting line and not any other. To do this, recall the idea that the line should try to reflect as accurately as possible the data we have, and observing the graph, for many examples, there are obvious gaps between the blue points and the red line! These are the errors (green lines) we need to try to minimise.</p>
+<div id="introducing-a-bit-of-math." class="section level2">
+<h2><span class="header-section-number">2.1</span> Introducing a bit of math.</h2>
+<p>Ok, so now that we know at a high level what does linear regression do and what would be our goal to get the best possible fitting line, let’s introduce the mathematical model that describes linear regression.</p>
+<p><img src="images/2.PNG" width="235" /></p>
+<p>where <span class="math inline">\(y\)</span> is the dependant variable, <span class="math inline">\(\beta_i\)</span> is the parameter that adjusts the weight of example <span class="math inline">\(x_i\)</span> and <span class="math inline">\(??\)</span> is the error terms that the model would introduce even when all independent variables where equal to 0. Lets use again our previous example of murders vs unemployment rate and lets calculate the error for the best possible fitted line and another different line. Here you can see a small subset of the examples:</p>
+<p><img src="images/3.PNG" width="765" /></p>
+<p>By choosing different <span class="math inline">\(??_i\)</span> (7.08 and 4) and <span class="math inline">\(??\)</span>, (28.53 and 15), we get different linear equations, and with these we see we get different errors, which as we know, means the lines don’t fit perfectly the data. Intuitively we can think that the best possible fitted line will have the lowest sum of all errors between the real example and the prediction made by the linear model. Here are the values for the total errors for both linear equations:</p>
+<p><img src="images/4.PNG" width="533" /></p>
+<p>We can see that the total errors for the best fitting line is less than the other random line, which matches our understanding of how linear regression should work. In the following graph you can graphically see the differences between line 1 and line 2.</p>
+<p><img src="images/5.PNG" width="1665" /></p>
+<p><br></p>
+</div>
+</div>
+<div id="accurate-model-comparison-normalisation-of-the-model." class="section level1">
+<h1><span class="header-section-number">3</span> Accurate model comparison (normalisation of the model).</h1>
+<p>Even though the total error example is quite easy to understand, this is not the correct way to evaluate part of a model performance. To explain, let me use an example:</p>
+<p>1 - Imagine we have the same dataset: murders vs unemployment rate and the sum of errors for the best fitted line is 467.60 2 - Imagine we also have a dataset comparing government social investment vs unemployment rate and that the sum of errors for the best fitted line is 100000.</p>
+<p>Can we directly compare both models? <strong>NO</strong>. The reason is that the variables used having totally different scales, hence, we cannot simply use the magnitude of the error to say that one model is better than the other. So, what do we use? To do this we use the <strong>COEFFICIENT OF DETERMINATION</strong>, commonly known as R-squared. The most important property of R-squared is that it ranges from 0 to 1, being 1 a perfect match between the predicted model and the real data. These are the formulas that determine R-squared: Image source: <a href="http://www.slideshare.net/21_venkat/correlation-regression-17406392" class="uri">http://www.slideshare.net/21_venkat/correlation-regression-17406392</a></p>
+<p><img src="images/6.PNG" width="562" /><img src="images/7.jpg" width="587" /></p>
+<p>A very useful dataset to see the effect of different variables in the R-squared of different models is data gathered by Orley Ashenfelter when he wanted to predict wine quality (reflected by price of the wine) without tasting it. What will happen to the performance of the linear model when adding more variables:</p>
+<p>**Note: this example is extracted from the Analytics Edge course in the online learning platform edX <a href="https://www.edx.org/course/analytics-edge-mitx-15-071x-2**" class="uri">https://www.edx.org/course/analytics-edge-mitx-15-071x-2**</a></p>
+<p><img src="images/8.PNG" width="772" /></p>
+<p>So, in this case, with different combinations of variables, we get different results for R-squared. Just for the sake of curiosity, adding the “population” variables doesn’t increase the accuracy of our model, which intuitively makes sense, as the quality of a wine should have nothing to do to the number of people living in the area were the grapes were grown.</p>
+<p><br></p>
+</div>
+<div id="careful-with-the-data." class="section level1">
+<h1><span class="header-section-number">4</span> Careful with the data.</h1>
+<p>Until now, everything we have seen, follow a logic stream and is easy to understand, but there is still an important clarification to make. Even though the idea behind R-squared is relatively easy to understand, you must never rely solely on this metric. You should always plot the data to graphically check what it looks like. Let me illustrate why is this necessary with an example. There is a very famous dataset which is commonly known as the Anscombe’s quartet. This dataset has a very curious property (among others): it has approximately the linear regression line for each case and approximately the same correlation even though the dataset are completely different!</p>
+<p>**Image source: <a href="https://en.wikipedia.org/wiki/Anscombe%27s_quartet#/media/File:Anscombe%27s_quartet_3.svg**">https://en.wikipedia.org/wiki/Anscombe%27s_quartet#/media/File:Anscombe%27s_quartet_3.svg**</a></p>
+<p><img src="images/9.PNG" width="990" /></p>
+<p>It is very clear that linear regression would be totally acceptable in case 1, more or less acceptable in case 3 if we deal with the outlier, and absolutely not acceptable for cases 2 and 4. This shows the importance not throwing yourself into model creation without some previous understanding of the data!</p>
+<p><br></p>
+</div>
+<div id="basic-supervised-learning-algorithm" class="section level1">
+<h1><span class="header-section-number">5</span> Basic Supervised learning algorithm</h1>
+<ol style="list-style-type: decimal">
+<li>Say that we have a certain training dataset.</li>
+<li>We feed the training data into a learning algorithm</li>
+<li>We create a hypothesis.</li>
+<li>Test the hypothesis inputting data and predicting outcome hypothesis.</li>
+</ol>
+<p><img src="images/10.PNG" width="547" /></p>
+<p><br></p>
+</div>
+<div id="hypothesis-for-univariate-linear-regression" class="section level1">
+<h1><span class="header-section-number">6</span> Hypothesis for univariate linear regression</h1>
+<p><strong>Hypothesis.</strong> The hypothesis formula should seem familiar to you as it represents a linear equation. In this case, our output (our hypothesis) is dependant of the value of x. The theta values are the ones we want to choose to fit the data as perfectly as possible.</p>
+<p><img src="images/11.PNG" width="163" /></p>
+<p><strong>Goal.</strong> Minimize the squared error difference between our predicted hypothesis and the actual value of y. This total errors can be seen as a cost, eg, the bigger the total errors, the bigger cost you would have, and hence, the idea is to minimize a cost function.</p>
+<p><img src="images/12.PNG" width="376" /></p>
+<p><strong>Notation:</strong> <span class="math inline">\(J\)</span> = cost function. <span class="math inline">\(m\)</span> = total number of training examples. <span class="math inline">\(x^{(i)}\)</span> = i-th training example <span class="math inline">\(y^{(i)}\)</span> = i-th actual value</p>
+<p><br></p>
+</div>
+<div id="cost-function---intuition" class="section level1">
+<h1><span class="header-section-number">7</span> Cost function - intuition</h1>
+<p>Ok, this cost function might seems a bit scary for those of you who do not feel comfortable with maths. I will try to use a numeric example to help you understand this. Let’s simplify the example and eliminate the independent term <span class="math inline">\(\theta_0\)</span>:</p>
+<p><img src="images/13.PNG" width="777" /></p>
+<p>The following table shows in initial data (blue colour) and the different hypothesis outputs we get when changing <span class="math inline">\(theta_1\)</span>:</p>
+<p><img src="images/14.PNG" width="1012" /><img src="images/15.PNG" width="772" /></p>
+<p>It is quite obvious that <span class="math inline">\(??_1 = 1\)</span> (white columns) would be the best choice as it fits perfectly the real data! All other possibilities (purple, green, red lines) are different from the real data, and therefore will have an error associated with it. So, how does these different possible <span class="math inline">\(??_1\)</span> values affect the cost function <span class="math inline">\(J\)</span>?</p>
+<p>We calculate the squared difference for each example <span class="math inline">\(y\)</span> and hypothesis <span class="math inline">\(h\)</span>. Then we add all error as the sum of sq. errors, and finally we apply the cost function equation to get <span class="math inline">\(J\)</span>:</p>
+<p><img src="images/16.PNG" width="1233" /><img src="images/17.PNG" width="762" /></p>
+<p><br></p>
+</div>
+<div id="gradient-descent-algorithm" class="section level1">
+<h1><span class="header-section-number">8</span> Gradient Descent Algorithm</h1>
+<p>Ok, we as humans are able to say with a single glance that minimum point for the cost function would correspond to a combination of <span class="math inline">\(??_0 = 0\)</span>, <span class="math inline">\(??_1 = 1\)</span>. But, how does the machine get to this point? What steps does it have to follow in order to choose from infinite combinations, which is the best pair, the one that minimizes the cost function? To do this, we introduce Gradient Descent. Gradient descent is an iteration process that updates the values of the <span class="math inline">\(??\)</span> parameters until we reach convergence, in other words, it is a process that keeps updating <span class="math inline">\(??\)</span> until there is no difference in the last repetition (because we have reached the minimum and there is no better solution to update with a different value).</p>
+<p><img src="images/18.PNG" width="770" /></p>
+<p>Again, this formulation might be a bit overwhelming for those not comfortable with maths, especially as we introduce partial derivatives. In addition, we have introduced a new parameter ?? that we haven’t yet defined. So, let’s try to explain how gradient descent works with a graphic example.</p>
+<div id="partial-derivatives." class="section level2">
+<h2><span class="header-section-number">8.1</span> Partial derivatives.</h2>
+<p>It graphically represents the slope of the curve on a certain point. The important information we need from the slope is if it’s positive or negative.</p>
+<p><img src="images/19.PNG" width="611" /></p>
+<p>In this case, we have a positive slope, therefore, we have a positive term for the partial derivatives in the equation. Taking into consideration that alpha is positive, then applying gradient descent, the next step will update theta with a smaller value, and therefore, getting closer to the minimum!</p>
+</div>
+<div id="effect-of-alpha." class="section level2">
+<h2><span class="header-section-number">8.2</span> Effect of alpha.</h2>
+<p>Alpha is a positive constant and there are 2 main extreme effects that could jeopardize the implementation of gradient descent:</p>
+<ol style="list-style-type: decimal">
+<li>Alpha too small: a minimum will be found, but it will take too many operations to find it. Slow but accurate.</li>
+<li>Alpha too big: as alpha is too big, the steps taken might be too big, and therefore, we might be jumping over the minimum without reaching it. Quicker but we might be able to converge.</li>
+</ol>
+<p><img src="images/20.PNG" width="613" /><img src="images/21.PNG" width="614" /></p>
+</div>
+<div id="gradient-descent-for-univariate-linear-regression" class="section level2">
+<h2><span class="header-section-number">8.3</span> Gradient descent for univariate linear regression</h2>
+<p>So once understood how gradient descent works, let me formulate the equation and apply it for the case of 1 variable using linear regression.</p>
+<p><img src="images/22.PNG" width="770" /></p>
+<p><br></p>
+</div>
+</div>
+<div id="multivariate-linear-regression" class="section level1">
+<h1><span class="header-section-number">9</span> Multivariate linear regression</h1>
+<p>I wanted to divide the explanation of linear regression in 2 posts: univariate (1 single independent variable) and multivariate (when the linear model includes more than 1 independent variable). I think that understanding what happens with 1 variable is essential to then follow easily how the algorithm is affected with the introduction of more variables.</p>
+<div id="formula-and-notation" class="section level2">
+<h2><span class="header-section-number">9.1</span> Formula and notation</h2>
+<p>Let’s introduce a simple example to show what we mean by having a linear model with multiple independent variables.</p>
+<p><img src="images/31.PNG" width="764" /></p>
+<p>We want to predict house prices (variable <span class="math inline">\(y\)</span>), and we have 3 different features (<span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span>, <span class="math inline">\(x_3\)</span>). How would our hypothesis function look like? And what would be the general formula?</p>
+<p><img src="images/32.PNG" width="637" /></p>
+<p>This formula looks fine on paper, but if you want to implement it in code, the best idea would be to vectorise it (throughout all theory posts, the final goal will be always to vectorise formulas).</p>
+<p><img src="images/33.PNG" width="307" /></p>
+</div>
+<div id="gradient-descent-for-multiple-features" class="section level2">
+<h2><span class="header-section-number">9.2</span> Gradient descent for multiple features</h2>
+<p>Recall the formulas used for univariate linear regression:</p>
+<p><img src="images/34.PNG" width="648" /></p>
+<p>The only change that will differentiate gradient descent for multiple features will be the generalization of the formula for univariate linear regression gradient descent. In fact, the previous formula will be replace for the generalised one because it covers both the univariate and multivariate situation.</p>
+<p><strong>Gradient descent: Repeat until convergence:</strong></p>
+<p><img src="images/35.PNG" width="376" /><img src="images/36.PNG" width="674" /></p>
+</div>
+<div id="changes-to-gradient-descent-feature-scaling" class="section level2">
+<h2><span class="header-section-number">9.3</span> Changes to gradient descent: feature scaling</h2>
+<p>There are 2 main ideas behind feature scaling: 1. For intuition purposes it is easier to compare 2 features that are normalised. For example how to compare: 1.1. <span class="math inline">\(x_1\)</span>: size (range from 10-2000 m2) 1.2. <span class="math inline">\(x_2\)</span>: number beds (range from 1-10) 1.3. They are 2 variables with very different ranges and this is difficult to compare directly with a single number.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>For running / debugging purposes, feature scaling speeds up the algorithm and tends to find the minimum quicker.</li>
+</ol>
+<p>Two way to normalise features:</p>
+<p><img src="images/37.PNG" width="769" /><img src="images/38.PNG" width="378" /></p>
+</div>
+<div id="changes-to-gradient-descent-learning-rate" class="section level2">
+<h2><span class="header-section-number">9.4</span> Changes to gradient descent: learning rate</h2>
+<p>Recall we saw what happened with different learning rates for univariate linear regression (it could be really slow or it could even diverge and not reach a minimum)</p>
+<p><img src="images/20.PNG" width="613" /><img src="images/21.PNG" width="614" /></p>
+<p>In this section we will make sure that gradient descent is working correctly with a debugging method. We understand that, with every iteration of gradient descent, there is an update of the <span class="math inline">\(\beta\)</span> values that reflect in smaller magnitudes of the cost function, which imply we are moving towards a minimum. With that premise, the idea is to plot the cost function <span class="math inline">\(J\)</span> against the number of iterations we are using in the gradient descent loop.</p>
+<p><img src="images/39.PNG" width="585" /></p>
+<p>Example where we would say gradient descent is not converging:</p>
+<p><img src="images/40.PNG" width="592" /></p>
+</div>
+<div id="computing-parameters-normal-equation" class="section level2">
+<h2><span class="header-section-number">9.5</span> Computing parameters: normal equation</h2>
+<p>In this section, we will introduce another method to solve the THETA values. Until now, we have seen how to calculate a linear model to adjust the data using and remember, that do this, we used gradient descent which is an iterative process. As we saw, 2 of the main problems gradient descent has are: 1.The need of feature scaling, 2.The need of choosing alpha. These can be supressed with the introduction of the normal equation. To explain it lets introduce a numeric example:</p>
+<p><img src="images/41.PNG" width="772" /><img src="images/42.PNG" width="674" /></p>
+<p>I am not going to demonstrate the steps in order to get the final theta formula, but it can de shown that using a vectorised approach, we can analytically calculate theta parameters using:</p>
+<p><img src="images/43.PNG" width="219" /></p>
+<p>It seems that using the normal equation is much simpler than using gradient descent right? Well, as always, there are caveats when using it. If you haven’t yet guessed, its main problem is when dealing with a lot of features. Say for example we have more than 10,000 features:</p>
+<p><img src="images/44.PNG" width="744" /></p>
+</div>
+<div id="when-to-use-it" class="section level2">
+<h2><span class="header-section-number">9.6</span> When to use it</h2>
+<p><img src="images/45.PNG" width="776" /></p>
+<p><br></p>
+</div>
+</div>
+<div id="truck-prediction-problem" class="section level1">
+<h1><span class="header-section-number">10</span> Truck prediction problem</h1>
+<div id="problem" class="section level2">
+<h2><span class="header-section-number">10.1</span> Problem</h2>
+<p>Suppose you are the CEO of a restaurant franchise and are considering different cities for opening a new outlet. The chain already has trucks in various cities and you have data for profits and populations from the cities. You would like to use this data to help you select which city to expand to next.</p>
+</div>
+<div id="visualising-the-data" class="section level2">
+<h2><span class="header-section-number">10.2</span> Visualising the data</h2>
+<p>Data sample:</p>
+<p><img src="images/23.PNG" width="726" /><img src="images/24.PNG" width="561" /></p>
+</div>
+<div id="gradient-descent" class="section level2">
+<h2><span class="header-section-number">10.3</span> Gradient descent</h2>
+<p>In order to find the best fit linear equation, in other words, to find the linear equation which has the lowest cost function, we apply the gradient descent iterative process to calculate the <span class="math inline">\(??\)</span> parameters which define the linear equation.</p>
+<p><img src="images/25.PNG" width="725" /><img src="images/26.PNG" width="726" /><img src="images/27.PNG" width="561" /></p>
+</div>
+<div id="checkig-results" class="section level2">
+<h2><span class="header-section-number">10.4</span> Checkig results</h2>
+<p>Obviously, achieve a result like the one shown above is by itself something to be proud of, but of course, we need to check if this solution has actually reached a minimum in the cost function. We will do this by plotting the cost function against the number of iterations done by gradient descent.</p>
+<p><img src="images/28.PNG" width="561" /></p>
+<p>It seems that gradient descent is doing a good job and throughout the iterations, the cost function (remember, the sum of squared errors) is decreasing until it gets to a point where it seems it flattens out. To double check that the flattening out happens because we have reached a minimum in the cost function, lets plot the gradient descent.</p>
+<p><img src="images/29.PNG" width="561" /><img src="images/30.PNG" width="561" /></p>
+<p>It can be seen that the sequence of <span class="math inline">\(\theta\)</span> values seems to move towards the minimum (which would be the center of the contour plot). So again, with this evidence we could say that the linear equation we have found is the best possible fit. However, remember to always try to understand your data, just as we did in the initial step. Maybe a different order equation might fit the data better!</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
